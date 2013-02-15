@@ -1,3 +1,5 @@
+#! /usr/bin/env python3
+
 # Python implementation of the SPIKE algorithm
 # As described in Polizzi et.al. “A parallel hybrid banded system solver: the SPIKE algorithm”
 # And Polizzi et.al. “SPIKE: A parallel environment for solving banded linear systems”
@@ -7,6 +9,9 @@
 # © 2013 Paul Mayer and Natanael Arndt <arndtn@gmail.com>
 
 import numpy
+import partition
+import factor
+import solve
 
 # Determine the number of partitions/processors
 
