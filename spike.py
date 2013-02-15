@@ -1,14 +1,16 @@
-#! /usr/bin/env python3
+#! /usr/bin/env python
 
 # Python implementation of the SPIKE algorithm
-# As described in Polizzi et.al. “A parallel hybrid banded system solver: the SPIKE algorithm”
-# And Polizzi et.al. “SPIKE: A parallel environment for solving banded linear systems”
+# As described in Polizzi et.al. "A parallel hybrid banded system solver: the SPIKE algorithm"
+# And Polizzi et.al. "SPIKE: A parallel environment for solving banded linear systems"
 #
 # This module is the main program to run a complete SPIKE algorithm on a Banded Linear System
 #
-# © 2013 Paul Mayer and Natanael Arndt <arndtn@gmail.com>
+# (c) 2013 Paul Mayer and Natanael Arndt <arndtn@gmail.com>
 
-import numpy
+from numpy import *
+from scipy.sparse import *
+from scipy import *
 import partition
 import factor
 import solve
