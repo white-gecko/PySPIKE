@@ -8,10 +8,13 @@
 #
 # (c) 2013 Paul Mayer and Natanael Arndt <arndtn@gmail.com>
 
+import sys
 from numpy import *
 from scipy.sparse.linalg import *
 from scipy.sparse import *
 from scipy import *
+import scipy.io as sio
+
 import partition
 import factor
 import solve
@@ -21,6 +24,10 @@ import solve
 # Note: we should put each of the following steps into a separate module/file
 
 # load matrix from .mat file with scipy matlab
+matrixFileName = sys.argv[1]
+
+print "loading matrix file:", matrixFileName
+matlab = sio.loadmat(matrixFileName)
 
 # 1. Pre-processing
 # 1.1 Partitioning of the original system onto different processors
