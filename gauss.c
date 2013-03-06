@@ -67,66 +67,95 @@ void printMatrix (float* a, int m, int n)
     }
 }
 
-int main()
+int gauss(float* a, float* x, int m, int n)
 {
-    int i,j,k,n = 3, i_max;
+    int i,j,k;
 
-    float *x = (float *)malloc(n * sizeof(float *));
-    float *c = (float *)malloc(n * sizeof(float *));
-    float *a = (float *)malloc(n * n * sizeof(float *));
-    a[0] = 7;
-    a[1] = 3;
-    a[2] = -5;
-    a[n] = -1;
-    a[n+1] = -2;
-    a[n+2] = 4;
-    a[2*n] = -4;
-    a[2*n+1] = 1;
-    a[2*n+2] = -3;
-    c[0] = -12;
-    c[1] = 5;
-    c[2] = 1;
+    // right hand size
+    int rhsize = n-m;
+    if (rhsize <= 0) {
+        printf("The matrix has to be wider than high.");
+        return -1;
+    }
 
-    printMatrix(a, n, n);
-    printf("\n");
+    // forward elimination
+    for (k = 0; k < m; k++) {
 
-    for (k = 0; k < n; k++) {
+        /* if with pivoting
         i_max = argMax(a, k, n);
 
         if (a[i_max*n+k] == 0) {
             printf("The matrix is singular!");
             return -1;
         }
+        */
 
-        swap(a, c, k, i_max, k, n);
+        if (a[k*n+k] == 0) {
+            printf("The matrix is singular!");
+            return -1;
+        }
 
-        printf("\nswaped k %d with i_max %d\n", k, i_max);
-        printMatrix(a, n, n);
-        printf("\n");
+        // if with pivoting
+        //swap(a, c, k, i_max, k, n);
 
-        printf("\nc:\n");
-        printMatrix(c, n, 1);
-        printf("\n");
-
-        for (i = k+1; i < n; i++) {
+        // iterate rows
+        for (i = k+1; i < m; i++) {
+            // iterate columns
             for (j = k+1; j < n; j++) {
                 a[i*n+j] = a[i*n+j] - (a[i*n+k] / a[k*n+k]) * a[k*n+j];
             }
-            c[i] = c[i] - (a[i*n+k] / a[k*n+k]) * c[k];
             a[i*n+k] = 0;
         }
     }
 
-    // solve backward
-    for (i = n-1; i >= 0; i--) {
-        x[i] = c[i] / a[i*n+i];
-        for (j = i+1; j < n; j++) {
-            x[i] -= (a[i*n+j] * x[j]) / a[i*n+i];
+    // backward substitution
+    int rhs;
+    for (rhs = 0; rhs < rhsize; rhs++) {
+        for (i = m-1; i >= 0; i--) {
+            x[i*rhsize+rhs] = a[i*n+m+rhs] / a[i*n+i];
+            for (j = i+1; j < n; j++) {
+                x[i*rhsize+rhs] -= (a[i*n+j] * x[j*rhsize+rhs]) / a[i*n+i];
+            }
         }
     }
 
+    return 0;
+}
+
+int main()
+{
+    //int i,j,k,i_max;
+    int m = 3, n = 5;
+
+    float *x = (float *)malloc(2 * m * sizeof(float *));
+    float *a = (float *)malloc(m * n * sizeof(float *));
+    a[0] = 7;
+    a[1] = 3;
+    a[2] = -5;
+    a[3] = -12;     // c[0]
+    a[4] = -12;     // c[0]
+    a[n] = -1;
+    a[n+1] = -2;
+    a[n+2] = 4;
+    a[n+3] = 5;     // c[1]
+    a[n+4] = 5;     // c[1]
+    a[2*n] = -4;
+    a[2*n+1] = 1;
+    a[2*n+2] = -3;
+    a[2*n+3] = 1;   // c[2]
+    a[2*n+4] = 1;   // c[2]
+
+    printMatrix(a, m, n);
+    printf("\n");
+
+    gauss(a, x, m, n);
+
+    printf("a:\n");
+    printMatrix(a, m, n);
+    printf("\n");
+
     printf("x:\n");
-    printMatrix(x, n, 1);
+    printMatrix(x, m, 2);
     printf("\n");
 
     return 0;

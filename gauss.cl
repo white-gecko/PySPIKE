@@ -30,7 +30,7 @@ void swap (float* a, float* c, int rowOne, int rowTwo, int k, int n)
     c[rowTwo] = tmp;
 }
 
-__kernel int gauss(__global float a*, __global float x*, __global int m, __global int n)
+__kernel int gauss(__global float *a, __global float *x, __global int m, __global int n)
 {
     int i,j,k;
 
@@ -62,9 +62,9 @@ __kernel int gauss(__global float a*, __global float x*, __global int m, __globa
     int rhs;
     for (rhs = 0; rhs < rhsize; rhs++) {
         for (i = m-1; i >= 0; i--) {
-            x[rhs*m+i] = a[i*n+m+rhs] / a[i*n+i];
+            x[i*rhsize+rhs] = a[i*n+m+rhs] / a[i*n+i];
             for (j = i+1; j < n; j++) {
-                x[rhs*m+i] -= (a[i*n+j] * x[rhs*m+j]) / a[i*n+i];
+                x[i*rhsize+rhs] -= (a[i*n+j] * x[j*rhsize+rhs]) / a[i*n+i];
             }
         }
     }
