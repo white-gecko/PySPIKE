@@ -42,8 +42,7 @@ prg = cl.Program(ctx, """
     }
 """).build()
 
-
-for k in range(n):
+for k in range(n-1):
     kernel = prg.eliminate
     kernel.set_scalar_arg_dtypes([None, numpy.int32, numpy.int32])
     # I hope it also takes the last column
