@@ -1,3 +1,4 @@
+#! /usr/bin/env python
 # The module solves the partitions
 
-# execute cl-kernel
+# execute a cl-kernel
