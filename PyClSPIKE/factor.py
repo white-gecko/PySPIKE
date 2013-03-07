@@ -1,4 +1,5 @@
 #! /usr/bin/env python
 # This module factorices the partitions
 
-# execute a cl kernel
+def factor(ctx, a_buf, x_buf, f_buf):
+    return
