@@ -71,3 +71,20 @@ __kernel int gauss(__global float *a, __global float *x, __global int m, __globa
 
     return 0;
 }
+
+/**
+ * Does the A_j[V_j,W_j,G_j] factorization
+ *
+ * @param a the global A Matrix
+ * @param x the space, where to put the result (V_j,W_j,G_j)
+ * @param f the right hand side global F matrix
+ * @param n the size of each A_j
+ * @param bw the bandwith of the matrix
+ */
+__kernel int factor(__global float *a, __global float *x, __global float *f, __global int n, __global int bw)
+{
+    int gid = get_global_id(0);
+    // extract A_j, B_j and C_j from row
+    //a[gid*n+...]
+    return 0;
+}
