@@ -4,7 +4,9 @@ import numpy
 import scipy
 import pyopencl as cl
 
-def partition(config, ctx, A, f, debug = False):
+import printMatrix
+
+def partition(config, ctx, queue, program, A, f, debug = False):
 
     matrixSize = config['matrixSize']
     bandwidth = config['bandwidth']
@@ -38,11 +40,17 @@ def partition(config, ctx, A, f, debug = False):
         print scipy.sparse.vstack(Cj).todense()
 
     # add f
-    Abcf = scipy.sparse.hstack([scipy.sparse.vstack(Aj), scipy.sparse.vstack(Bj), scipy.sparse.vstack(Cj), f])
+    Abcf = numpy.ascontiguousarray(scipy.sparse.hstack([scipy.sparse.vstack(Aj), scipy.sparse.vstack(Bj), scipy.sparse.vstack(Cj), f]).toarray(), dtype=numpy.float32)
+    x = numpy.ones((matrixSize, 2 * offdiagonalSize + f.shape[1]))
+
+    #print type(Abcf)
+    #print Abcf
 
     # move the matrizes to CL-buffer
     mf = cl.mem_flags
-    A_buf = cl.Buffer(ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=Abcf.todense())
-    x_buf = cl.Buffer(ctx, mf.WRITE_ONLY | mf.COPY_HOST_PTR, hostbuf=numpy.ones((matrixSize, 2 * offdiagonalSize + f.shape[1])))
+    A_buf = cl.Buffer(ctx, mf.READ_WRITE | mf.COPY_HOST_PTR, hostbuf=Abcf)
+    x_buf = cl.Buffer(ctx, mf.WRITE_ONLY | mf.COPY_HOST_PTR, hostbuf=x)
+
+    printMatrix.printMatrix(config, queue, program, A_buf)
 
     return [A_buf, x_buf]

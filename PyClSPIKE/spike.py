@@ -20,6 +20,7 @@ from utils import sparse_creator
 import partition
 import factor
 import solve
+import printMatrix
 
 def spike(matrixSize, bandwidth, partitionNumber) :
 
@@ -66,7 +67,9 @@ def spike(matrixSize, bandwidth, partitionNumber) :
 
     # 1. Pre-processing
     # 1.1 Partitioning of the original system onto different processors
-    buffers = partition.partition(config, ctx, A, b)
+    buffers = partition.partition(config, ctx, queue, program, A, b, debug = False)
+
+    printMatrix.printMatrix(config, queue, program, buffers[0])
 
     # 1.2 Factorization of each diagonal block
     # solve A_j[V_j, W_j, G_j] = [(0 ... 0 B_j)T, (C_j 0 ... 0)T, F_j]
@@ -75,7 +78,7 @@ def spike(matrixSize, bandwidth, partitionNumber) :
 
     # 2. Post-processing
     # 2.1 Solving the reduced system
-    solve.gauss(config, ctx, queue, program, buffers)
+    #solve.gauss(config, ctx, queue, program, buffers)
 
     # solve SX = G
     # this step doesn't seam to be parallelizable
@@ -84,10 +87,10 @@ def spike(matrixSize, bandwidth, partitionNumber) :
 
 # set basic values
 matrixSize = 20000
-matrixSize = 10
+matrixSize = 20
 bandwidth = 100
-bandwidth = 2
+bandwidth = 4
 partitionNumber = 4
-partitionNumber = 2
+partitionNumber = 4
 
 spike(matrixSize, bandwidth, partitionNumber)
