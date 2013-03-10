@@ -100,6 +100,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
             }
         }
     }
+    printf((__constant char *)"Partition (%d) ... done\n", gid);
 
     return;
 }
