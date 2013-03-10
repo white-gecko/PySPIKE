@@ -88,6 +88,10 @@ def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
     # this step doesn't seam to be parallelizable
 
     # 2.2 Retrieving the overall solution
+    x = numpy.zeros((matrixSize, 2 * offdiagonalSize + b.shape[1]), dtype=numpy.float32)
+    cl.enqueue_copy(queue, x, buffers[1])
+
+    print x
 
 # set basic values
 matrixSize = 20000

@@ -40,7 +40,7 @@ def partition(config, ctx, A, f, debug = False):
         print scipy.sparse.vstack(Cj).todense()
 
     Abcf = numpy.ascontiguousarray(scipy.sparse.hstack([scipy.sparse.vstack(Aj), scipy.sparse.vstack(Bj), scipy.sparse.vstack(Cj), f]).toarray(), dtype=numpy.float32)
-    x = numpy.ones((matrixSize, 2 * offdiagonalSize + f.shape[1]))
+    x = numpy.ones((matrixSize, 2 * offdiagonalSize + f.shape[1]), dtype=numpy.float32)
 
     # move the matrizes to CL-buffer
     mf = cl.mem_flags
