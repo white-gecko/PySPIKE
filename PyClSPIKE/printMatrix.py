@@ -12,5 +12,5 @@ def printMatrix(config, queue, program, A_buf):
         None,
         A_buf,  # A matrix
         numpy.int32(config['matrixSize']),
-        numpy.int32(config['partitionSize'] * config['partitionNumber'])
+        numpy.int32(config['partitionSize'] + 2 * config['offdiagonalSize'] + config['rhsSize'])
     )

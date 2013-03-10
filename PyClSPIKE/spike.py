@@ -22,7 +22,7 @@ import factor
 import solve
 import printMatrix
 
-def spike(matrixSize, bandwidth, partitionNumber) :
+def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
 
     # Determine the size of each partition
     if (matrixSize / partitionNumber < bandwidth) :
@@ -47,6 +47,9 @@ def spike(matrixSize, bandwidth, partitionNumber) :
         'offdiagonalSize': offdiagonalSize
     }
 
+    if (debug) :
+        print config
+
     # Note: we should put each of the following steps into a separate module/file
 
     # create Matrices
@@ -67,9 +70,10 @@ def spike(matrixSize, bandwidth, partitionNumber) :
 
     # 1. Pre-processing
     # 1.1 Partitioning of the original system onto different processors
-    buffers = partition.partition(config, ctx, queue, program, A, b, debug = False)
+    buffers = partition.partition(config, ctx, A, b, debug)
 
-    printMatrix.printMatrix(config, queue, program, buffers[0])
+    if (debug) :
+        printMatrix.printMatrix(config, queue, program, buffers[0])
 
     # 1.2 Factorization of each diagonal block
     # solve A_j[V_j, W_j, G_j] = [(0 ... 0 B_j)T, (C_j 0 ... 0)T, F_j]
@@ -93,4 +97,4 @@ bandwidth = 4
 partitionNumber = 4
 partitionNumber = 4
 
-spike(matrixSize, bandwidth, partitionNumber)
+spike(matrixSize, bandwidth, partitionNumber, debug = False)

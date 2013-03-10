@@ -36,6 +36,7 @@ void swap (float* a, float* c, int rowOne, int rowTwo, int k, int n)
  */
 __kernel void printMatrix (__global float *a, int m, int n)
 {
+    printf((__constant char *)"%d x %d\n", m, n);
     int i, j;
     for (i = 0; i < m; i++) {
         for (j = 0; j < n; j++) {
