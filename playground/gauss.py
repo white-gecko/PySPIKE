@@ -2,6 +2,7 @@
 
 import pyopencl as cl
 import numpy
+from time import time
 #import numpy.linalg as la
 
 ctx = cl.create_some_context()
@@ -38,6 +39,7 @@ prg = cl.Program(ctx, """
         int ai = k*n+gid;
         for (i = k+1; i < n; i++) {
             a[i*n+gid] = a[i*n+gid] - (a[i*n+k] / a[ak]) * a[ai];
+            //a[i*n+gid] = gid;
         }
     }
 """).build()
@@ -47,14 +49,20 @@ for k in range(n-1):
     kernel.set_scalar_arg_dtypes([None, numpy.int32, numpy.int32])
     # I hope it also takes the last column
     # how can I put only k jobs into the queue
-    kernel(queue, a.shape, None, a_buf, numpy.int32(k), numpy.int32(n))
+    event = kernel(queue, (n-k,), None, a_buf, numpy.int32(k), numpy.int32(n))
     #for (i = k+1; i < n; i++) {
     #    a[i*n+k] = 0
     #}
-
     # We need to wait for all jobs on each loop
+    t1 = time()
     cl.enqueue_barrier(queue)
+    t2 = time()
+    cl.enqueue_copy(queue, a, a_buf)
+    t3 = time()
+    #print("t1: ", t1-t2, " t2: ", t2-t3)
+    print("k: ", k)
+    print(a)
 
 cl.enqueue_copy(queue, a, a_buf)
 
-print a
+#print a
