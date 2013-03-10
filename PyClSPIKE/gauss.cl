@@ -27,22 +27,54 @@ void swap (float* a, float* c, int rowOne, int rowTwo, int k, int n)
     c[rowTwo] = tmp;
 }
 
+/**
+ * print matrix of size m×n
+ *
+ * @param a the matrix
+ * @param m count of rows
+ * @param n count of columns
+ */
+__kernel void printMatrix (__global float *a, int m, int n)
+{
+    int i, j;
+    for (i = 0; i < m; i++) {
+        for (j = 0; j < n; j++) {
+            printf((__constant char *)"%f\t", a[i*n+j]);
+        }
+        printf((__constant char *)"\n");
+    }
+}
+
+/**
+ * Index method, to calculate the index for accessing the matrix
+ *
+ *
+ */
+int _(int i, int j, int m, int n, int gid)
+{
+    return (gid*m+i)*n+j;
+}
+
+/**
+ * The kernel for solving a linear system with forward elimination and backward substitution
+ */
 __kernel void gauss(__global float *a, __global float *x, int m, int n)
 {
     int i,j,k;
+    int gid = get_global_id(0);
 
     // right hand size
     int rhsize = n-m;
     if (rhsize <= 0) {
-        printf((__constant char *)"The matrix has to be wider than high.");
+        printf((__constant char *)"Partition (%d): The matrix has to be wider than high.\n", gid);
         // write error to error register
         return;
     }
 
     // forward elimination
     for (k = 0; k < m; k++) {
-        if (a[k*n+k] == 0) {
-            printf((__constant char *)"The matrix is singular!");
+        if (a[_(k,k,m,n,gid)] == (float)0) {
+            printf((__constant char *)"Partition (%d): The matrix is singular at position k=%d (a[k,k]: %f)!\n", gid, k, a[_(k,k,m,n,gid)]);
             // write error to error register
             return;
         }
@@ -51,9 +83,9 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
         for (i = k+1; i < m; i++) {
             // iterate columns
             for (j = k+1; j < n; j++) {
-                a[i*n+j] = a[i*n+j] - (a[i*n+k] / a[k*n+k]) * a[k*n+j];
+                a[_(i,j,m,n,gid)] = a[_(i,j,m,n,gid)] - (a[_(i,k,m,n,gid)] / a[_(k,k,m,n,gid)]) * a[_(k,j,m,n,gid)];
             }
-            a[i*n+k] = 0;
+        a[_(i,k,m,n,gid)] = 0;
         }
     }
 
@@ -61,9 +93,9 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
     int rhs;
     for (rhs = 0; rhs < rhsize; rhs++) {
         for (i = m-1; i >= 0; i--) {
-            x[i*rhsize+rhs] = a[i*n+m+rhs] / a[i*n+i];
+            x[_(i,rhs,m,rhsize,gid)] = a[_(i,m+rhs,m,n,gid)] / a[_(i,i,m,n,gid)];
             for (j = i+1; j < n; j++) {
-                x[i*rhsize+rhs] -= (a[i*n+j] * x[j*rhsize+rhs]) / a[i*n+i];
+                x[_(i,rhs,m,rhsize,gid)] -= (a[_(i,j,m,n,gid)] * x[_(j,rhs,m,rhsize,gid)]) / a[_(i,i,m,n,gid)];
             }
         }
     }
