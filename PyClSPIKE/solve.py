@@ -1,12 +1,19 @@
 #! /usr/bin/env python
 # The module solves the partitions
+import numpy
 
-# execute a cl-kernel
-
-def gauss(config, ctx, program, a_buf, x_buf, shape, m, n):
+def gauss(config, ctx, queue, program, buffers):
     kernel = program.gauss
-    kernel.set_scalar_arg_dtypes([None, numpy.int32, numpy.int32])
+    kernel.set_scalar_arg_dtypes([None, None, numpy.int32, numpy.int32])
 
     # I hope it also takes the last column
     # how can I put only k jobs into the queue
-    kernel(queue, shape, None, a_buf, x_buf, numpy.int32(m), numpy.int32(n))
+    kernel(
+        queue,
+        (config['partitionNumber'],),
+        None,
+        buffers[0],  # A matrix
+        buffers[1],  # x matrix
+        numpy.int32(config['partitionSize']),
+        numpy.int32(config['partitionSize'] + 2 * config['offdiagonalSize'] + config['rhsSize'])
+    )

@@ -1,6 +1,3 @@
-#include<stdio.h>
-#include<stdlib.h>
-
 /**
  * Swap two rows im matrix a
  * @param a the matrix
@@ -30,22 +27,24 @@ void swap (float* a, float* c, int rowOne, int rowTwo, int k, int n)
     c[rowTwo] = tmp;
 }
 
-__kernel int gauss(__global float *a, __global float *x, __global int m, __global int n)
+__kernel void gauss(__global float *a, __global float *x, int m, int n)
 {
     int i,j,k;
 
     // right hand size
     int rhsize = n-m;
     if (rhsize <= 0) {
-        printf("The matrix has to be wider than high.");
-        return -1;
+        printf((__constant char *)"The matrix has to be wider than high.");
+        // write error to error register
+        return;
     }
 
     // forward elimination
     for (k = 0; k < m; k++) {
         if (a[k*n+k] == 0) {
-            printf("The matrix is singular!");
-            return -1;
+            printf((__constant char *)"The matrix is singular!");
+            // write error to error register
+            return;
         }
 
         // iterate rows
@@ -69,7 +68,7 @@ __kernel int gauss(__global float *a, __global float *x, __global int m, __globa
         }
     }
 
-    return 0;
+    return;
 }
 
 /**
@@ -81,10 +80,10 @@ __kernel int gauss(__global float *a, __global float *x, __global int m, __globa
  * @param n the size of each A_j
  * @param bw the bandwith of the matrix
  */
-__kernel int factor(__global float *a, __global float *x, __global float *f, __global int n, __global int bw)
+__kernel void factor(__global float *a, __global float *x,int n, int bw)
 {
     int gid = get_global_id(0);
     // extract A_j, B_j and C_j from row
     //a[gid*n+...]
-    return 0;
+    return;
 }
