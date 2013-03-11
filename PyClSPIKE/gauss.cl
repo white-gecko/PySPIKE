@@ -84,7 +84,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
         for (i = k+1; i < m; i++) {
             // iterate columns
             for (j = k+1; j < n; j++) {
-                a[_(i,j,m,n,gid)] = a[_(i,j,m,n,gid)] - (a[_(i,k,m,n,gid)] / a[_(k,k,m,n,gid)]) * a[_(k,j,m,n,gid)];
+                a[_(i,j,m,n,gid)] -= (a[_(i,k,m,n,gid)] / a[_(k,k,m,n,gid)]) * a[_(k,j,m,n,gid)];
             }
             a[_(i,k,m,n,gid)] = 0;
         }
@@ -95,7 +95,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
     for (rhs = 0; rhs < rhsize; rhs++) {
         for (i = m-1; i >= 0; i--) {
             x[_(i,rhs,m,rhsize,gid)] = a[_(i,m+rhs,m,n,gid)] / a[_(i,i,m,n,gid)];
-            for (j = i+1; j < n; j++) {
+            for (j = i+1; j < m; j++) {
                 x[_(i,rhs,m,rhsize,gid)] -= (a[_(i,j,m,n,gid)] * x[_(j,rhs,m,rhsize,gid)]) / a[_(i,i,m,n,gid)];
             }
         }
