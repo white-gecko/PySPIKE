@@ -82,23 +82,18 @@ def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
 
     # 2. Post-processing
     # 2.1 Solving the reduced system
-    #solve.gauss(config, ctx, queue, program, buffers)
-
-    # solve SX = G
-    # this step doesn't seam to be parallelizable
+    solve.reduced(config, queue, buffers)
 
     # 2.2 Retrieving the overall solution
-    x = numpy.zeros((matrixSize, 2 * offdiagonalSize + b.shape[1]), dtype=numpy.float32)
-    cl.enqueue_copy(queue, x, buffers[1])
-
-    print x
+    x = solve.final(config, queue, buffers)
 
 # set basic values
 matrixSize = 20000
-matrixSize = 20
 bandwidth = 100
-bandwidth = 4
 partitionNumber = 4
-partitionNumber = 4
+
+matrixSize = 10
+bandwidth = 2
+partitionNumber = 2
 
 spike(matrixSize, bandwidth, partitionNumber, debug = False)
