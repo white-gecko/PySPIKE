@@ -1,8 +1,9 @@
-#import pyopencl as cl
+#import pycuda.driver as cuda
+#import pycuda.autoinit
+#from pycuda.compiler import SourceModuleimport
 import numpy as np
 import scipy as sp
 import utils
-from scipy import sparse
 from scipy import linalg
 from time import time
 
@@ -33,6 +34,8 @@ class SpykeSolver(object):
 		pdim	= n / p
 		
 		for pcnt in xrange(p):
+			cj_last = -1
+			bj_first = -1
 			start 	= pcnt * pdim
 			stop 	= pcnt * pdim + pdim
 			Aj 	= self.A[start:stop,:][:,start:stop]
@@ -77,21 +80,51 @@ class SpykeSolver(object):
 			# LU decomposition & solve for Wj, Vj
 			[Pj, Lj, Uj] = linalg.lu(Aj.todense(), False, False)
 			
-			# solve for spike V_j
-			if (pcnt != p-1):
-				y_vects		= []
-				nj 			= Aj.shape[0]
-				start_at 	= nj - bj_first
-				for i in Bj.shape[1]:
-					y = []
-					for j in Bj.shape[1]:
-						y.append()
-	
+			# solve for spikes V_j, W_j and G_j
+			nj 			= Aj.shape[0]
+			b_width		= Bj.shape[1]
+			c_width		= Cj.shape[1]
+			y_vj_vects	= np.zeros(shape=(Bj.shape[0], Bj.shape[1]), dtype=np.float32)
+			y_wj_vects	= np.zeros(shape=(Cj.shape[0], Cj.shape[1]), dtype=np.float32)
+			y_gj_vect	= np.zeros(shape=(nj), dtype=np.float32)
+			
+			if (pcnt == 0):
+				wj_stopat = -1
+			else:
+				wj_stopat = cj_last
+				
+			print wj_stopat
+				
+			if (pcnt == p-1):
+				vj_startat = stop + 1
+			else:
+				vj_startat = bj_first
+				
+			vj_startat = nj - bj_first
+			print vj_startat, wj_stopat
+			
+			for i in xrange(nj):
+				lrange = Lj[i,0:i].transpose()
+				if i < wj_stopat - 1:
+
+					for j in xrange(b_width):
+						print "lengths", len(Lj[i,0:i]),len(y_vj_vects[j,0:i])
+						y_vj_vects[j, i] = (1./Lj[i,i] - (np.dot(lrange,y_vj_vects[j, 0:i])))
+				
+				if i > vj_startat + 1:
+					for j in xrange(c_width):
+						print "lengths", len(Lj[i,0:i]),len(y_wj_vects[j,0:i-vj_startat])
+						y_wj_vects[j, i] = (1./Lj[i,i] * (np.sum(Lj[i,vj_startat:i] * y_wj_vects[j,0:i-vj_startat])))
+					
+				y_gj_vect[i] = (1./Lj[i,i] - (np.dot(lrange,y_gj_vect[0:i])))
+				#print y_gj_vect[0:i]
+
+
 	def recursive_spike(self):
 		pass
 
 
-test = utils.create_banded_matrix(20000,100,100,1)
+test = utils.create_banded_matrix(100,6,6,1)
 b = np.zeros(3)
 x = np.zeros(3)
 start = time()
