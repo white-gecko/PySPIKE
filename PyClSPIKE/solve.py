@@ -16,6 +16,8 @@ def reduced(config, queue, buffers, debug=False):
     x = numpy.zeros((matrixSize, 2 * offdiagonalSize + rhsSize), dtype=numpy.float32)
     cl.enqueue_copy(queue, x, buffers[1])
 
+    print "x:", x
+
     Vj = x[0 : matrixSize, 0 : offdiagonalSize]
     Wj = x[0 : matrixSize, offdiagonalSize : 2 * offdiagonalSize]
     Gj = x[0 : matrixSize, 2 * offdiagonalSize :2 * offdiagonalSize + rhsSize]
@@ -43,7 +45,7 @@ def reduced(config, queue, buffers, debug=False):
             Gj[(i+1) * partitionSize - offdiagonalSize : (i + 1) * partitionSize, 0 : offdiagonalSize]  # bottom
         ])
 
-    print redV
+    #print redV
 
 def final(config, queue, buffers):
     return

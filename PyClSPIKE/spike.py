@@ -80,9 +80,12 @@ def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
     # this step also involves solving of A_j G_j = F_j from (2.1)
     factor.factor(config, ctx, queue, program, buffers)
 
+    if (debug) :
+        printMatrix.printMatrix(config, queue, program, buffers[0])
+
     # 2. Post-processing
     # 2.1 Solving the reduced system
-    solve.reduced(config, queue, buffers)
+    solve.reduced(config, queue, buffers, debug)
 
     # 2.2 Retrieving the overall solution
     x = solve.final(config, queue, buffers)
