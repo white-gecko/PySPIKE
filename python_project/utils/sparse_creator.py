@@ -1,6 +1,5 @@
 import numpy as np
-import scipy as sp
-from scipy.sparse import *
+from scipy.sparse import diags
 
 def create_banded_matrix(n, k1, k2, seed = 1):
 	'''
@@ -18,7 +17,7 @@ def create_banded_matrix(n, k1, k2, seed = 1):
 		diagonals.append(np.random.rand(n-i))
 	for i in xrange(1,k2+1):
 		diagonals.append(np.random.rand(n-i))
-	return diags(diagonals, [-x for x in range(k1+1)] + range(1,k2+1), format="csr", dtype=np.float)
+	return diags(diagonals, [-x for x in range(k1+1)] + range(1,k2+1), format="csr", dtype=np.float32)
 	
 	
 def create_rhs(matrix, result_vect):
@@ -34,4 +33,3 @@ def create_rhs(matrix, result_vect):
 	if len(result_vect) != matrix.shape[0]:
 		raise ValueError("Sizes do not match")
 	return matrix * result_vect
-
