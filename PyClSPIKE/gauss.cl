@@ -86,7 +86,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
             for (j = k+1; j < n; j++) {
                 a[_(i,j,m,n,gid)] = a[_(i,j,m,n,gid)] - (a[_(i,k,m,n,gid)] / a[_(k,k,m,n,gid)]) * a[_(k,j,m,n,gid)];
             }
-        a[_(i,k,m,n,gid)] = 0;
+            a[_(i,k,m,n,gid)] = 0;
         }
     }
 

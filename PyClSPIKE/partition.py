@@ -20,14 +20,16 @@ def partition(config, ctx, A, f, debug = False):
 
     for i in range(0, partitionNumber) :
         Aj.append(A[i * partitionSize : (i + 1) * partitionSize, i * partitionSize : (i + 1) * partitionSize])
+
         if (i+1 < partitionNumber) :
             Bj.append(A[i * partitionSize : (i + 1) * partitionSize, (i + 1) * partitionSize : (i + 1) * partitionSize + offdiagonalSize])
         else :
-            Bj.append(scipy.sparse.csr_matrix((partitionSize, offdiagonalSize), dtype=numpy.float))
+            Bj.append(scipy.sparse.csr_matrix((partitionSize, offdiagonalSize), dtype=numpy.float32))
+
         if i > 0 :
             Cj.append(A[i * partitionSize : (i + 1) * partitionSize, i * partitionSize - offdiagonalSize : i * partitionSize])
         else :
-            Cj.append(scipy.sparse.csr_matrix((partitionSize, offdiagonalSize), dtype=numpy.float))
+            Cj.append(scipy.sparse.csr_matrix((partitionSize, offdiagonalSize), dtype=numpy.float32))
 
     if (debug):
         print "A:"
