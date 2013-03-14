@@ -24,14 +24,15 @@ import printMatrix
 
 def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
 
-    # Determine the size of each partition
-    if (matrixSize / partitionNumber < bandwidth) :
-        print "The number of partitions must be smaller or equal to", matrixSize / bandwidth, "but it is", partitionNumber
-        return
+    # Check the values
+    if (partitionNumber < 2) :
+        raise ValueError("The partitionNumber has to be at least 2 but it is", partitonNumber)
+    elif (matrixSize / partitionNumber < bandwidth) :
+        raise ValueError("The number of partitions must be smaller or equal to", matrixSize / bandwidth, "but it is", partitionNumber)
     elif (matrixSize % partitionNumber != 0) :
-        print "The matrixSize should be devideable by the number of partitions"
-        return
+        raise ValueError("The matrixSize should be devideable by the number of partitions")
     else :
+        # Determine the size of each partition
         partitionSize = matrixSize / partitionNumber
 
     # make bandwidth even
@@ -57,7 +58,8 @@ def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
     x = numpy.ones(matrixSize)
     b = scipy.sparse.vstack(sparse_creator.create_rhs(A, x))
 
-    config['rhsSize'] = b.shape[1]
+    rhsSize = b.shape[1]
+    config['rhsSize'] = rhsSize
 
     # create prerequirements for OpenCL
     ctx = cl.create_some_context()
@@ -83,9 +85,15 @@ def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
     if (debug) :
         printMatrix.printMatrix(config, queue, program, buffers[0])
 
+    x = numpy.zeros((matrixSize, 2 * offdiagonalSize + rhsSize), dtype=numpy.float32)
+    cl.enqueue_copy(queue, x, buffers[1])
+
+    print "x:"
+    print x
+
     # 2. Post-processing
     # 2.1 Solving the reduced system
-    solve.reduced(config, queue, buffers, debug)
+    solve.reduced(config, ctx, queue, program, x, debug)
 
     # 2.2 Retrieving the overall solution
     x = solve.final(config, queue, buffers)
