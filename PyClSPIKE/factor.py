@@ -6,8 +6,6 @@ def factor(config, ctx, queue, program, buffers):
     kernel = program.gauss
     kernel.set_scalar_arg_dtypes([None, None, numpy.int32, numpy.int32])
 
-    # I hope it also takes the last column
-    # how can I put only k jobs into the queue
     kernel(
         queue,
         (config['partitionNumber'],),
