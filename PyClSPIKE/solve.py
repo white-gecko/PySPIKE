@@ -57,19 +57,17 @@ def reduced(config, ctx, queue, program, x, debug=False):
                 row.append(Zero)
                 row.append(Zero)
         elif (i+1 < partitionNumber) :
-            for j in range(2, partitionNumber) :
-                print "."
-                #row.append(Zero)
-                #row.append(Zero)
+            for j in range(2, i+1) :
+                row.append(Zero)
+                row.append(Zero)
             row.append(Zero)
             row.append(redW[i])
             row.append(Im)
             row.append(redV[i])
             row.append(Zero)
-            for j in range(2, partitionNumber) :
-                print "."
-                #row.append(Zero)
-                #row.append(Zero)
+            for j in range(2, partitionNumber-i) :
+                row.append(Zero)
+                row.append(Zero)
         else :
             for j in range(2, partitionNumber) :
                 row.append(Zero)
