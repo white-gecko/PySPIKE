@@ -22,7 +22,7 @@ import factor
 import solve
 import printMatrix
 
-def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
+def spike(matrixSize, bandwidth, partitionNumber, output, debug = False) :
 
     # Check the values
     if (partitionNumber < 2) :
@@ -48,15 +48,23 @@ def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
         'offdiagonalSize': offdiagonalSize
     }
 
-    if (debug) :
+    if (output) :
         print config
 
     # Note: we should put each of the following steps into a separate module/file
 
     # create Matrices
     A = sparse_creator.create_banded_matrix(matrixSize, bandwidth / 2, bandwidth / 2)
-    x = numpy.ones(matrixSize)
+    #x = numpy.ones(matrixSize)
+    x = numpy.random.rand(matrixSize)
     b = scipy.sparse.vstack(sparse_creator.create_rhs(A, x))
+    #b = scipy.sparse.vstack(numpy.random.rand(matrixSize))
+
+    if (output) :
+        print "input A:"
+        print A.todense()
+        print "input b:"
+        print b.todense()
 
     rhsSize = b.shape[1]
     config['rhsSize'] = rhsSize
@@ -85,26 +93,25 @@ def spike(matrixSize, bandwidth, partitionNumber, debug = False) :
     if (debug) :
         printMatrix.printMatrix(config, queue, program, buffers[0])
 
-    x = numpy.zeros((matrixSize, 2 * offdiagonalSize + rhsSize), dtype=numpy.float32)
-    cl.enqueue_copy(queue, x, buffers[1])
-
-    print "x:"
-    print x
+    # TODO at this point we can free the A buffer (buffers[0])
 
     # 2. Post-processing
     # 2.1 Solving the reduced system
-    solve.reduced(config, ctx, queue, program, x, debug)
+    buffers = solve.reduced(config, ctx, queue, program, buffers, debug)
 
     # 2.2 Retrieving the overall solution
-    x = solve.final(config, queue, buffers)
+    x = solve.final(config, ctx, queue, program, buffers, debug)
+
+    print "X:"
+    print x.todense()
 
 # set basic values
 matrixSize = 20000
-bandwidth = 100
-partitionNumber = 4
-
-matrixSize = 10
 bandwidth = 2
-partitionNumber = 2
+partitionNumber = 100
 
-spike(matrixSize, bandwidth, partitionNumber, debug = False)
+#matrixSize = 12
+#bandwidth = 2
+#partitionNumber = 4
+
+spike(matrixSize, bandwidth, partitionNumber, output = True, debug = False)
