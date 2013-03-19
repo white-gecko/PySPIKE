@@ -82,8 +82,9 @@ def reduced(config, ctx, queue, program, x, debug=False):
     redG = sparse.vstack(redG)
     SG = np.ascontiguousarray(sparse.hstack([redS, redG]).todense(), dtype=np.float32)
 
-    print "redSG:"
-    print SG
+    if (debug):
+        print "redSG:"
+        print SG
 
     x = np.ones(redG.shape, dtype=np.float32)
 
@@ -96,9 +97,6 @@ def reduced(config, ctx, queue, program, x, debug=False):
     kernel.set_scalar_arg_dtypes([None, None, np.int32, np.int32])
 
     kernel(queue, (1,), None, SG_buf, x_buf, np.int32(SG.shape[0]), np.int32(SG.shape[1]))
-    cl.enqueue_copy(queue, x, x_buf)
-
-    print x
 
 def topbottom(vector, i, partitionSize, offdiagonalSize):
     return sparse.vstack([
