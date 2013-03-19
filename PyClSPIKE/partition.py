@@ -2,6 +2,7 @@
 # input the matrix, amount of partitions and an OpenCL handler
 import numpy
 import scipy
+
 import pyopencl as cl
 
 import printMatrix

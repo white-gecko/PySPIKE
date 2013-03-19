@@ -93,17 +93,21 @@ def spike(matrixSize, bandwidth, partitionNumber, output, debug = False) :
     if (debug) :
         printMatrix.printMatrix(config, queue, program, buffers[0])
 
-    # TODO at this point we can free the A buffer (buffers[0])
+    # At this point we can free the A buffer (buffers[0])
+    # TODO make the memory release dependent on some event
+    #buffers[0].release()
 
     # 2. Post-processing
     # 2.1 Solving the reduced system
     buffers = solve.reduced(config, ctx, queue, program, buffers, debug)
 
+    # At this point we can free the SG buffer (buffers[2])
+    #buffers[2].release()
+
     # 2.2 Retrieving the overall solution
     x = solve.final(config, ctx, queue, program, buffers, debug)
 
-    print "X:"
-    print x.todense()
+    return x
 
 # set basic values
 matrixSize = 20000
@@ -114,4 +118,7 @@ partitionNumber = 100
 #bandwidth = 2
 #partitionNumber = 4
 
-spike(matrixSize, bandwidth, partitionNumber, output = True, debug = False)
+x = spike(matrixSize, bandwidth, partitionNumber, output = True, debug = False)
+
+print "X:"
+print x.todense()

@@ -1,10 +1,9 @@
 #! /usr/bin/env python
 # The module solves the partitions
 import numpy as np
-#from numpy import matrix
 import scipy as sp
-from scipy import linalg
 from scipy import sparse
+
 import pyopencl as cl
 
 # solve SX = G
@@ -126,14 +125,6 @@ def final(config, ctx, queue, program, buffers, debug=False):
     offdiagonalSize = config['offdiagonalSize']
     rhsSize = config['rhsSize']
 
-    # enqueue copy to make sure there is a memory barrier
-    xtb = np.ones((partitionNumber * 2 * offdiagonalSize, 1), dtype=np.float32)
-    cl.enqueue_copy(queue, xtb, buffers[3])
-
-    if (debug) :
-        print "X(t,b):"
-        print xtb
-
     xo  = np.ones((partitionNumber * (partitionSize - 2 * offdiagonalSize), offdiagonalSize), dtype=np.float32)
     tmp = np.ones((partitionNumber * (partitionSize - 2 * offdiagonalSize), offdiagonalSize), dtype=np.float32)
 
@@ -143,6 +134,8 @@ def final(config, ctx, queue, program, buffers, debug=False):
 
     kernel = program.reconstruct
     kernel.set_scalar_arg_dtypes([None, None, None, None, np.int32, np.int32])
+
+    cl.enqueue_barrier(queue)
 
     kernel(
         queue,
@@ -155,14 +148,22 @@ def final(config, ctx, queue, program, buffers, debug=False):
         np.int32(partitionSize),
         np.int32(offdiagonalSize)
     )
+
+    xtb = np.ones((partitionNumber * 2 * offdiagonalSize, 1), dtype=np.float32)
+    cl.enqueue_copy(queue, xtb, buffers[3])
+
+    if (debug) :
+        print "X(t,b):"
+        print xtb
+
     cl.enqueue_copy(queue, xo, xo_buf)
 
     if (debug) :
         print "X':"
         print xo
 
-    xtb = sp.sparse.csr_matrix(xtb)
-    xo = sp.sparse.csr_matrix(xo)
+    xtb = sparse.csr_matrix(xtb)
+    xo = sparse.csr_matrix(xo)
 
     x = []
     for i in range(0, partitionNumber) :
