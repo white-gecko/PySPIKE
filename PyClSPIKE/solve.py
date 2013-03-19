@@ -25,7 +25,7 @@ def reduced(config, ctx, queue, program, buffers, debug=False):
 
     Vj = sparse.csr_matrix(vwg[0 : matrixSize, 0 : offdiagonalSize])
     Wj = sparse.csr_matrix(vwg[0 : matrixSize, offdiagonalSize : 2 * offdiagonalSize])
-    Gj = sparse.csr_matrix(vwg[0 : matrixSize, 2 * offdiagonalSize :2 * offdiagonalSize + rhsSize])
+    Gj = sparse.csr_matrix(vwg[0 : matrixSize, 2 * offdiagonalSize : 2 * offdiagonalSize + rhsSize])
 
     if (debug) :
         print "Vj:"
@@ -127,15 +127,15 @@ def final(config, ctx, queue, program, buffers, debug=False):
     offdiagonalSize = config['offdiagonalSize']
     rhsSize = config['rhsSize']
 
-    xo  = np.ones((partitionNumber * (partitionSize - 2 * offdiagonalSize), offdiagonalSize), dtype=np.float32)
-    tmp = np.ones((partitionNumber * (partitionSize - 2 * offdiagonalSize), offdiagonalSize), dtype=np.float32)
+    xo  = np.ones((partitionNumber * (partitionSize - 2 * offdiagonalSize), rhsSize), dtype=np.float32)
+    tmp = np.ones((partitionNumber * (partitionSize - 2 * offdiagonalSize), rhsSize), dtype=np.float32)
 
     mf = cl.mem_flags
     xo_buf  = cl.Buffer(ctx, mf.WRITE_ONLY | mf.COPY_HOST_PTR, hostbuf=xo)
     tmp_buf = cl.Buffer(ctx, mf.WRITE_ONLY | mf.COPY_HOST_PTR, hostbuf=tmp)
 
     kernel = program.reconstruct
-    kernel.set_scalar_arg_dtypes([None, None, None, None, np.int32, np.int32])
+    kernel.set_scalar_arg_dtypes([None, None, None, None, np.int32, np.int32, np.int32])
 
     cl.enqueue_barrier(queue)
 
@@ -148,10 +148,11 @@ def final(config, ctx, queue, program, buffers, debug=False):
         xo_buf,
         tmp_buf,
         np.int32(partitionSize),
-        np.int32(offdiagonalSize)
+        np.int32(offdiagonalSize),
+        np.int32(rhsSize)
     )
 
-    xtb = np.ones((partitionNumber * 2 * offdiagonalSize, 1), dtype=np.float32)
+    xtb = np.ones((partitionNumber * 2 * offdiagonalSize, rhsSize), dtype=np.float32)
     cl.enqueue_copy(queue, xtb, buffers[3])
 
     if (debug) :
@@ -173,8 +174,8 @@ def final(config, ctx, queue, program, buffers, debug=False):
         b = (i + 1) * (2 * offdiagonalSize)
         u = i * (partitionSize - 2 * offdiagonalSize)
         v = (i + 1) * (partitionSize - 2 * offdiagonalSize)
-        x.append(xtb[t : t + offdiagonalSize, 0 : 1])
-        x.append(xo[u : v, 0 : 1])
-        x.append(xtb[b - offdiagonalSize : b, 0 : 1])
+        x.append(xtb[t : t + offdiagonalSize, 0 : rhsSize])
+        x.append(xo[u : v, 0 : rhsSize])
+        x.append(xtb[b - offdiagonalSize : b, 0 : rhsSize])
 
     return sp.sparse.vstack(x)

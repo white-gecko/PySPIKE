@@ -170,7 +170,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
  * @param n the size of each A_j
  * @param bw the bandwith of the matrix
  */
-__kernel void reconstruct(__global float *vwg, __global float *x, __global float *xo, __global float *tmp, int m, int offSize)
+__kernel void reconstruct(__global float *vwg, __global float *x, __global float *xo, __global float *tmp, int m, int offSize, int rhsSize)
 {
     int gid = get_global_id(0);
     // extract A_j, B_j and C_j from row
@@ -178,22 +178,21 @@ __kernel void reconstruct(__global float *vwg, __global float *x, __global float
 
     // offSize - offdiagonalSize
     // m - partitionSize
-    // n - offSize*3
-    int n = 3 * offSize;
+    int n = 2 * offSize + rhsSize;
 
     buffer vwgBuf = {vwg, m, n};
-    buffer xBuf = {x, 2*offSize, offSize};
+    buffer xBuf = {x, 2*offSize, rhsSize};
     // make sure offSize is equal to the #columns of RHS
-    buffer xoBuf = {xo, m - (2 * offSize), offSize};
-    buffer tmpBuf = {tmp, m - (2 * offSize), offSize};
+    buffer xoBuf = {xo, m - (2 * offSize), rhsSize};
+    buffer tmpBuf = {tmp, m - (2 * offSize), rhsSize};
 
     if (gid == 0) {
         // case X'1 = G'1 - V'1 * Xt2
         // GPU xo[0] = vwg[_(offSize,2*offSize,m,n,gid)] - v[_(offSize,0,m,n,gid)] * x[_(2*offSize,0,2*offSize,offSize,gid)];
         matrix vm  = {vwgBuf, offSize,     0,           m - offSize,       offSize};
-        matrix gm  = {vwgBuf, offSize,     2 * offSize, m - offSize,       3 * offSize};
-        matrix xtm = {xBuf,   2 * offSize, 0,           3 * offSize,       offSize};
-        matrix xom = {xoBuf,  0,           0,           m - (2 * offSize), offSize};
+        matrix gm  = {vwgBuf, offSize,     2 * offSize, m - offSize,       2 * offSize + rhsSize};
+        matrix xtm = {xBuf,   2 * offSize, 0,           3 * offSize,       rhsSize};
+        matrix xom = {xoBuf,  0,           0,           m - (2 * offSize), rhsSize};
 
         multiplySubstractMatrix(xom, gm, vm, xtm);
     } else if (gid < get_global_size(0)) {
@@ -202,11 +201,11 @@ __kernel void reconstruct(__global float *vwg, __global float *x, __global float
 
         matrix vm  = {vwgBuf, offSize,     0,           m - offSize,       offSize};
         matrix wm  = {vwgBuf, offSize,     offSize,     m - offSize,       2 * offSize};
-        matrix gm  = {vwgBuf, offSize,     2 * offSize, m - offSize,       3 * offSize};
-        matrix xtm = {xBuf,   2 * offSize, 0,           3 * offSize,       offSize};
-        matrix xbm = {xBuf,   -offSize,    0,           0,                 offSize};
-        matrix tmp = {tmpBuf, 0,           0,           m - (2 * offSize), offSize};
-        matrix xom = {xoBuf,  0,           0,           m - (2 * offSize), offSize};
+        matrix gm  = {vwgBuf, offSize,     2 * offSize, m - offSize,       2 * offSize + rhsSize};
+        matrix xtm = {xBuf,   2 * offSize, 0,           3 * offSize,       rhsSize};
+        matrix xbm = {xBuf,   -offSize,    0,           0,                 rhsSize};
+        matrix tmp = {tmpBuf, 0,           0,           m - (2 * offSize), rhsSize};
+        matrix xom = {xoBuf,  0,           0,           m - (2 * offSize), rhsSize};
 
         multiplySubstractMatrix(tmp, gm, vm, xtm);
         multiplySubstractMatrix(xom, tmp, wm, xbm);
@@ -214,9 +213,9 @@ __kernel void reconstruct(__global float *vwg, __global float *x, __global float
         // case X'p
         //xo[gid] = g[gid] - w[gid]*x[gid-1 b];
         matrix wm  = {vwgBuf, offSize,     offSize,     m - offSize,       2 * offSize};
-        matrix gm  = {vwgBuf, offSize,     2 * offSize, m - offSize,       3 * offSize};
-        matrix xbm = {xBuf,   -offSize,    0,           0,                 offSize};
-        matrix xom = {xoBuf,  0,           0,           m - (2 * offSize), offSize};
+        matrix gm  = {vwgBuf, offSize,     2 * offSize, m - offSize,       2 * offSize + rhsSize};
+        matrix xbm = {xBuf,   -offSize,    0,           0,                 rhsSize};
+        matrix xom = {xoBuf,  0,           0,           m - (2 * offSize), rhsSize};
 
         multiplySubstractMatrix(xom, gm, wm, xbm);
     }
