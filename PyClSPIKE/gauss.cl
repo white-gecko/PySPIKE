@@ -156,7 +156,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
             }
         }
     }
-    printf((__constant char *)"Partition (%d) ... done\n", gid);
+    printf((__constant char *)"Partition (%d) gauss ... done\n", gid);
 
     return;
 }
@@ -220,6 +220,8 @@ __kernel void reconstruct(__global float *vwg, __global float *x, __global float
 
         multiplySubstractMatrix(xom, gm, wm, xbm);
     }
+
+    printf((__constant char *)"Partition (%d) reconstruct ... done\n", gid);
 
     return;
 }
