@@ -42,7 +42,7 @@ def reduced(config, ctx, queue, program, buffers, debug=False):
     for i in range(0, partitionNumber) :
         redV.append(topbottom(Vj, i, partitionSize, offdiagonalSize))
         redW.append(topbottom(Wj, i, partitionSize, offdiagonalSize))
-        redG.append(topbottom(Gj, i, partitionSize, offdiagonalSize))
+        redG.append(topbottom(Gj, i, partitionSize, offdiagonalSize, rhsSize))
 
     # The shape of the matrix is:
     #
@@ -111,10 +111,12 @@ def reduced(config, ctx, queue, program, buffers, debug=False):
     buffers.append(x_buf)
     return buffers
 
-def topbottom(vector, i, partitionSize, offdiagonalSize):
+def topbottom(vector, i, partitionSize, offdiagonalSize, columns = 0):
+    if (columns == 0) :
+        columns = offdiagonalSize
     return sparse.vstack([
-        vector[i * partitionSize : i * partitionSize + offdiagonalSize, 0 : offdiagonalSize], # top
-        vector[(i+1) * partitionSize - offdiagonalSize : (i + 1) * partitionSize, 0 : offdiagonalSize]  # bottom
+        vector[i * partitionSize : i * partitionSize + offdiagonalSize, 0 : columns], # top
+        vector[(i+1) * partitionSize - offdiagonalSize : (i + 1) * partitionSize, 0 : columns]  # bottom
     ])
 
 def final(config, ctx, queue, program, buffers, debug=False):

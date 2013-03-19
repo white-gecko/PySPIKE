@@ -111,7 +111,7 @@ def spike(matrixSize, bandwidth, partitionNumber, output, debug = False) :
 
 # set basic values
 matrixSize = 20000
-bandwidth = 2
+bandwidth = 4
 partitionNumber = 100
 
 #matrixSize = 12
