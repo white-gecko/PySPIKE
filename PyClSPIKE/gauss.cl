@@ -71,7 +71,6 @@ typedef struct {
 void multiplySubstractMatrix (matrix r, matrix a, matrix b, matrix c) {
     if (b.l-b.j != c.k-c.i) {
         int gid = get_global_id(0);
-        printf((__constant char *)"Partition %d: Dimensions of B and C not compatible: (%d×%d) and (%d×%d)\n", gid, b.i-b.k, b.j-b.l, c.i-c.k, c.j-c.l);
         return;
     }
 
@@ -94,25 +93,6 @@ void multiplySubstractMatrix (matrix r, matrix a, matrix b, matrix c) {
 }
 
 /**
- * print matrix of size m×n
- *
- * @param a the matrix
- * @param m count of rows
- * @param n count of columns
- */
-__kernel void printMatrix (__global float *a, int m, int n)
-{
-    printf((__constant char *)"%d x %d\n", m, n);
-    int i, j;
-    for (i = 0; i < m; i++) {
-        for (j = 0; j < n; j++) {
-            printf((__constant char *)"%f\t", a[i*n+j]);
-        }
-        printf((__constant char *)"\n");
-    }
-}
-
-/**
  * The kernel for solving a linear system with forward elimination and backward substitution
  */
 __kernel void gauss(__global float *a, __global float *x, int m, int n)
@@ -123,7 +103,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
     // right hand size
     int rhsize = n-m;
     if (rhsize <= 0) {
-        printf((__constant char *)"Partition (%d): The matrix has to be wider than high.\n", gid);
+        //printf((__constant char *)"Partition (%d): The matrix has to be wider than high.\n", gid);
         // write error to error register
         return;
     }
@@ -131,7 +111,7 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
     // forward elimination
     for (k = 0; k < m; k++) {
         if (a[_(k,k,m,n,gid)] == (float)0) {
-            printf((__constant char *)"Partition (%d): The matrix is singular at position k=%d (a[k,k]: %f)!\n", gid, k, a[_(k,k,m,n,gid)]);
+            //printf((__constant char *)"Partition (%d): The matrix is singular at position k=%d (a[k,k]: %f)!\n", gid, k, a[_(k,k,m,n,gid)]);
             // write error to error register
             return;
         }
@@ -156,7 +136,6 @@ __kernel void gauss(__global float *a, __global float *x, int m, int n)
             }
         }
     }
-    printf((__constant char *)"Partition (%d) gauss ... done\n", gid);
 
     return;
 }
@@ -219,8 +198,6 @@ __kernel void reconstruct(__global float *vwg, __global float *x, __global float
 
         multiplySubstractMatrix(xom, gm, wm, xbm);
     }
-
-    printf((__constant char *)"Partition (%d) reconstruct ... done\n", gid);
 
     return;
 }

@@ -5,7 +5,6 @@ import scipy
 
 import pyopencl as cl
 
-import printMatrix
 
 def partition(config, ctx, A, f, debug = False):
 
