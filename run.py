@@ -2,19 +2,26 @@
 
 from PyClSPIKE import spike
 from python_project.utils import sparse_creator
-import numpy
-import scipy
+from python_project.solver import LapackBenchmark
+import numpy as np
+import scipy as sp
+from time import time
+from numpy.linalg import norm
 
 # set basic values
-matrixSize = 20000
+matrixSize = 2000
 bandwidth = 6
-partitionNumber = 100
+partitionNumber = 50
+runs = 20
+fun = min
 
 config = {
     'matrixSize': matrixSize,
     'bandwidth': bandwidth,
     'partitionNumber': partitionNumber,
 }
+
+
 
 # Note: we should put each of the following steps into a separate module/file
 
@@ -23,9 +30,23 @@ A = sparse_creator.create_banded_matrix(matrixSize, bandwidth / 2, bandwidth / 2
 #x = numpy.ones(matrixSize)
 #x = numpy.random.rand(matrixSize)
 #b = scipy.sparse.vstack(sparse_creator.create_rhs(A, x))
-b = scipy.sparse.csr_matrix(numpy.random.rand(matrixSize, 2))
+x_hat = np.ones(matrixSize, dtype=np.float32)
+b = sp.sparse.vstack(sparse_creator.create_rhs(A, x_hat))
 
-x = spike.spike(A, b, config)
+x_primes = []
+bench 	 = []
+for i in xrange(runs):
+	x_prime, t = spike.spike(A, b, config)
+	bench.append(t)
+	x_primes.append(norm(x_hat - x_prime))
+res = fun(bench)
+err = sum(x_primes)/len(x_primes)
+print ' '.join(['Runtime over', str(runs), 'runs:', str(res)])
+print ' '.join(['Average error:', str(err)])
 
-print "X:"
-print x.todense()
+# lapack bench
+b = sparse_creator.create_rhs(A, x_hat)
+lapack_sparse = LapackBenchmark(A,b,x_hat)
+lapack_sparse.benchmark_spsolve()
+#print "X:"
+#print x.todense()

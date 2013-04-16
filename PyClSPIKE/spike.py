@@ -20,7 +20,7 @@ import partition
 import factor
 import solve
 
-def spike(A, b, config, output = True, debug = False) :
+def spike(A, b, config, output = False, debug = False) :
 
     # Check the values
     if (config['partitionNumber'] < 2) :
@@ -49,10 +49,10 @@ def spike(A, b, config, output = True, debug = False) :
         print b.todense()
 
     # create prerequirements for OpenCL
-    #ctx = cl.create_some_context(True)
-    for platform in cl.get_platforms() :
-        devices = platform.get_devices(cl.device_type.CPU)
-        ctx = cl.Context(devices)
+    ctx = cl.create_some_context(True)
+    #for platform in cl.get_platforms() :
+    #    devices = platform.get_devices(cl.device_type.CPU)
+    #    ctx = cl.Context(devices)
     queue = cl.CommandQueue(ctx)
 
     # compile programm code for CL
@@ -63,6 +63,7 @@ def spike(A, b, config, output = True, debug = False) :
 
     # 1. Pre-processing
     # 1.1 Partitioning of the original system onto different processors
+    start = time()
     buffers = partition.partition(config, ctx, A, b, debug)
 
     # 1.2 Factorization of each diagonal block
@@ -83,5 +84,6 @@ def spike(A, b, config, output = True, debug = False) :
 
     # 2.2 Retrieving the overall solution
     x = solve.final(config, ctx, queue, program, buffers, debug)
-
-    return x
+    stop = time()
+    rt = stop-start
+    return [x, rt]
