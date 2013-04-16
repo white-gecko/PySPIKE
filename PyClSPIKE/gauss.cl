@@ -1,32 +1,3 @@
-/**
- * Swap two rows im matrix a
- * @param a the matrix
- * @param c the RHS vector
- * @param rowOne (vertical) position of first row in a
- * @param rowTwo (vertical) position of second row in a
- * @param k (horizontal) position of first non zero
- */
-void swap (float* a, float* c, int rowOne, int rowTwo, int k, int n)
-{
-    if (rowOne == rowTwo) {
-        return;
-    }
-
-    double tmp;
-
-    //swap matrix
-    for (tmp = 0; k < n; k++) {
-         tmp = a[rowOne*n+k];
-         a[rowOne*n+k] = a[rowTwo*n+k];
-         a[rowTwo*n+k] = tmp;
-    }
-
-    // swap RHS
-    tmp = c[rowOne];
-    c[rowOne] = c[rowTwo];
-    c[rowTwo] = tmp;
-}
-
 typedef struct {
     __global float *mat;
     int m, n;
