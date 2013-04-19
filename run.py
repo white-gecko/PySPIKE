@@ -50,7 +50,8 @@ for i in xrange(runs):
     x_prime, t = spike.spike(A, b, config, False)
     bench.append(t)
     x_primes.append(norm(x_hat - x_prime))
-    print "."
+    sys.stdout.write('.')
+    sys.stdout.flush()
 res = fun(bench)
 avg = float(sum(bench))/len(bench)
 err = sum(x_primes)/len(x_primes)
