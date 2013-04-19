@@ -35,7 +35,7 @@ class LapackBenchmark(object):
 		x_primes = []
 		for i in xrange(runs):
 			start 	= time()
-			x_prime = spsolve(self.A,self.b)
+			x_prime = spsolve(self.A.astype(np.double),self.b.astype(np.double))
 			stop 	= time()
 			bench.append(stop-start)
 			x_primes.append(norm(self.x - x_prime))
