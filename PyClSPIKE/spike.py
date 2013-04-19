@@ -28,7 +28,7 @@ def spike(A, b, config, output = True, debug = False) :
     elif (config['matrixSize'] / config['partitionNumber'] < config['bandwidth']) :
         raise ValueError("The number of partitions must be smaller or equal to", config['matrixSize'] / config['bandwidth'], "but it is", config['partitionNumber'])
     elif (config['matrixSize'] % config['partitionNumber'] != 0) :
-        raise ValueError("The matrixSize should be devideable by the number of partitions")
+        raise ValueError("The matrixSize should be devideable by the number of partitions. given:", config['matrixSize'], config['partitionNumber'])
     else :
         # Determine the size of each partition
         config['partitionSize'] = config['matrixSize'] / config['partitionNumber']
