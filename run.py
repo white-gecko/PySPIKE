@@ -55,7 +55,8 @@ for i in xrange(runs):
 res = fun(bench)
 avg = float(sum(bench))/len(bench)
 err = sum(x_primes)/len(x_primes)
-print ' '.join(['Runtime over', str(runs), 'runs:', str(res), 'avg:', str(avg)])
+print ''
+print ' '.join(['Runtime over', str(runs), 'runs:', str(res), 'avg:', str(avg), 'delta:', str(avg-res)])
 print ' '.join(['Average error:', str(err)])
 
 # lapack bench
