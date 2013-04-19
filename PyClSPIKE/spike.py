@@ -20,11 +20,11 @@ import partition
 import factor
 import solve
 
-def spike(A, b, config, output = False, debug = False) :
+def spike(A, b, config, output = True, debug = False) :
 
     # Check the values
     if (config['partitionNumber'] < 2) :
-        raise ValueError("The partitionNumber has to be at least 2 but it is", config['partitonNumber'])
+        raise ValueError("The partitionNumber has to be at least 2 but it is", config['partitionNumber'])
     elif (config['matrixSize'] / config['partitionNumber'] < config['bandwidth']) :
         raise ValueError("The number of partitions must be smaller or equal to", config['matrixSize'] / config['bandwidth'], "but it is", config['partitionNumber'])
     elif (config['matrixSize'] % config['partitionNumber'] != 0) :
